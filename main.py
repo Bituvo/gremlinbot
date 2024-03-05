@@ -212,7 +212,7 @@ async def add_as_candidate(interaction, message: discord.Message):
     save_data()
 
     if message.content:
-        await reply(f"Gremlin added! ID: **`#{index + 1}`**", ephemeral=True)
+        await reply(f"Gremlin added! ID: **`#{index + 1}`**")
     else:
         await reply((
             f"Gremlin added! ID: **`#{index + 1}`**"

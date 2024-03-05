@@ -157,12 +157,12 @@ class ConfirmClearCandidatesView(ui.View):
 async def add_as_candidate(interaction, message: discord.Message):
     reply = interaction.response.send_message
 
-    if message.channel.id != THREAD_ID:
-        await reply("You must be in the gremlin thread.", ephemeral=True)
-        return
-
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.", ephemeral=True)
+        return
+
+    if message.channel.id != THREAD_ID:
+        await reply("You must be in the gremlin thread.", ephemeral=True)
         return
 
     attachment_found = False
@@ -207,12 +207,12 @@ async def add_as_candidate(interaction, message: discord.Message):
 async def remove_from_candidates(interaction, message: discord.Message):
     reply = lambda content: interaction.response.send_message(content, ephemeral=True)
 
-    if message.channel.id != THREAD_ID:
-        await reply("You must be in the gremlin thread.")
+    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+        await reply("You do not have the necessary permissions.", ephemeral=True)
         return
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
-        await reply("You do not have the necessary permissions.")
+    if message.channel.id != THREAD_ID:
+        await reply("You must be in the gremlin thread.")
         return
 
     candidate_index = next(
@@ -233,12 +233,12 @@ async def remove_from_candidates(interaction, message: discord.Message):
 async def set_description(interaction, message: discord.Message):
     reply = lambda content: interaction.response.send_message(content, ephemeral=True)
 
+    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+        await reply("You do not have the necessary permissions.", ephemeral=True)
+        return
+
     if message.channel.id != THREAD_ID:
         await reply("You must be in the gremlin thread.")
-        return
-    
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
-        await reply("You do not have the necessary permissions.")
         return
     
     candidate_index = next(

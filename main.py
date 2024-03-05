@@ -5,11 +5,14 @@ from dotenv import load_dotenv
 from gzip import compress, decompress
 from json import loads, dumps
 from random import choices
+from urllib.parse import urlparse
 from os import getcwd, environ
-from os.path import join
+from os.path import join, basename
+from io import BytesIO
 from discord.ext import tasks, commands
 from discord import app_commands, ui
 import discord
+import aiohttp
 
 load_dotenv(join(getcwd(), ".env"))
 
@@ -312,26 +315,33 @@ def elect_candidate():
 
     return elected_candidate
 
-def get_elected_embed(elected_candidate):
-    embed = discord.Embed(title=f"Gremlin of the Day *#{amount_elected}*", color=ACCENT)
+async def publish_election(channel, elected_candidate):
+    thread = channel.get_thread(THREAD_ID)
+    content = f'''
+# Gremlin of the Day #{amount_elected}
+## "{elected_candidate["description"]}"
+*Submitted by {elected_candidate["author-mention"]}*
+||Submit your gremlins in {thread.jump_url}||'''
+    
+    async with aiohttp.ClientSession() as session:
+        async with session.get(elected_candidate["image-url"]) as response:
+            buffer = BytesIO(await response.read())
 
-    embed.set_author(
-        name = r"\x1b[1;95mcroozington\x1b[0m",
-        icon_url = elected_candidate["author-avatar-url"]
+    await channel.send(
+        content,
+        file = discord.File(
+            filename = basename(urlparse(elected_candidate["image-url"]).path),
+            fp = buffer
+        ),
+        suppress_embeds = True
     )
-    embed.add_field(
-        name = f'"{elected_candidate["description"]}"',
-        value = f"Submitted by {elected_candidate['author-mention']}"
-    )
-    embed.set_image(url=elected_candidate["image-url"])
-
-    return embed
 
 @tasks.loop(time=NOON_EST)
 async def publish_candidate():
     if candidates:
         channel = bot.get_channel(GREMLINS_ID)
-        await channel.send(embed=get_elected_embed(elect_candidate()))
+        elected_candidate = elect_candidate()
+        await publish_election(channel, elected_candidate)
 
     save_data()
 

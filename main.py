@@ -155,14 +155,14 @@ class ConfirmClearCandidatesView(ui.View):
 
 @app_commands.context_menu(name="Add gremlin as candidate")
 async def add_as_candidate(interaction, message: discord.Message):
-    reply = interaction.response.send_message
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
-        await reply("You do not have the necessary permissions.", ephemeral=True)
+        await reply("You do not have the necessary permissions.")
         return
 
     if message.channel.id != THREAD_ID:
-        await reply("You must be in the gremlin thread.", ephemeral=True)
+        await reply("You must be in the gremlin thread.")
         return
 
     attachment_found = False
@@ -172,15 +172,15 @@ async def add_as_candidate(interaction, message: discord.Message):
             attachment_found = True
 
     if not attachment_found:
-        await reply("Gremlin not found. Make sure that the message has one picture.", ephemeral=True)
+        await reply("Gremlin not found. Make sure that the message has one picture.")
         return
     
     if any(candidate["message-id"] == message.id for candidate in candidates):
-        await reply("This gremlin is already in the list of candidates.", ephemeral=True)
+        await reply("This gremlin is already in the list of candidates.")
         return
     
     if message.id in elected_message_ids:
-        await reply("This gremlin has already been elected!", ephemeral=True)
+        await reply("This gremlin has already been elected!")
         return
     
     index = len(candidates)
@@ -201,14 +201,14 @@ async def add_as_candidate(interaction, message: discord.Message):
         await reply((
             f"Gremlin added! ID: **`#{index + 1}`**"
             "\nIt has no description. Would you like to add one?"
-        ), view=AddDescriptionView(index), ephemeral=True)
+        ), view=AddDescriptionView(index))
 
 @app_commands.context_menu(name="Remove gremlin from candidates")
 async def remove_from_candidates(interaction, message: discord.Message):
-    reply = lambda content: interaction.response.send_message(content, ephemeral=True)
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
-        await reply("You do not have the necessary permissions.", ephemeral=True)
+        await reply("You do not have the necessary permissions.")
         return
 
     if message.channel.id != THREAD_ID:
@@ -231,10 +231,10 @@ async def remove_from_candidates(interaction, message: discord.Message):
 
 @app_commands.context_menu(name="Set gremlin description")
 async def set_description(interaction, message: discord.Message):
-    reply = lambda content: interaction.response.send_message(content, ephemeral=True)
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
-        await reply("You do not have the necessary permissions.", ephemeral=True)
+        await reply("You do not have the necessary permissions.")
         return
 
     if message.channel.id != THREAD_ID:
@@ -261,7 +261,7 @@ bot.tree.add_command(set_description)
     description = "List all gremlin candidates"
 )
 async def list_candidates(interaction):
-    reply = lambda content: interaction.response.send_message(content, ephemeral=True)
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
@@ -278,7 +278,7 @@ async def list_candidates(interaction):
     description = "Clears all gremlin candidates"
 )
 async def clear_candidates(interaction):
-    reply = lambda content: interaction.response.send_message(content, ephemeral=True)
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
     if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
@@ -288,10 +288,9 @@ async def clear_candidates(interaction):
         await reply("The list of gremlin candidates is already empty.")
         return
     
-    await interaction.response.send_message(
+    await reply(
         "Are you sure you want to clear the list of gremlin candidates? **This action is irreversible!**",
-        view = ConfirmClearCandidatesView(),
-        ephemeral = True
+        view = ConfirmClearCandidatesView()
     )
 
 weight_function = lambda x: max(-4 * x ** 2 + 0.6, 0.5 * (x + 0.3) ** 2)

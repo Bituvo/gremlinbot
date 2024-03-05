@@ -68,7 +68,7 @@ class SetDescriptionModal(ui.Modal):
                 ephemeral = True
             )
 
-class SetDescriptionView(ui.View):
+class AddDescriptionView(ui.View):
     def __init__(self, index):
         super().__init__()
         self.index = index
@@ -197,7 +197,7 @@ async def add_as_candidate(interaction, message: discord.Message):
         await reply((
             f"Gremlin added! ID: **`#{index + 1}`**"
             "\nIt has no description. Would you like to add one?"
-        ), view=SetDescriptionView(index), ephemeral=True)
+        ), view=AddDescriptionView(index), ephemeral=True)
 
 @app_commands.context_menu(name="Remove gremlin from candidates")
 async def remove_from_candidates(interaction, message: discord.Message):

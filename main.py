@@ -392,6 +392,6 @@ async def on_ready():
     await bot.tree.sync()
 
     print("Connected")
-    await publish_candidate()
+    publish_candidate.start()
 
 bot.run(TOKEN)

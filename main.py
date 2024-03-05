@@ -41,11 +41,12 @@ def load_data():
 def save_data():
     with open("gremlins.dat", "wb") as file:
         file.write(compress(dumps({
+            "amount-elected": amount_elected,
             "elected-message-ids": elected_message_ids,
             "candidates": candidates
         }).encode()))
 
-elected_message_ids, candidates = load_data()
+amount_elected, elected_message_ids, candidates = load_data()
 
 class SetDescriptionModal(ui.Modal):
     def __init__(self, index, title="Gremlin Description"):
@@ -332,12 +333,12 @@ async def clear_elected(interaction):
 weight_function = lambda x: max(-4 * x ** 2 + 0.6, 0.5 * (x + 0.3) ** 2)
 
 def elect_candidate():
-    global elected_message_ids, candidates
+    global amount_elected, elected_message_ids, candidates
 
     if len(candidates) == 1:
-        elected_candidate = candidates[0]
+        elected_candidate = candidates.pop(0)
         elected_message_ids.append(elected_candidate["message-id"])
-        candidates = []
+        amount_elected += 1
         return elected_candidate
 
     message_ids = [candidate["message-id"] for candidate in candidates]
@@ -351,13 +352,14 @@ def elect_candidate():
 
     elected_candidate = candidates.pop(elected_candidate_index)
     elected_message_ids.append(elected_candidate["message-id"])
+    amount_elected += 1
 
     return elected_candidate
 
 async def publish_election(channel, elected_candidate):
     thread = channel.get_thread(THREAD_ID)
     content = f'''
-# Gremlin of the Day #{len(elected_message_ids)}
+# Gremlin of the Day #{amount_elected}
 ## "{elected_candidate["description"]}"
 *Submitted by {elected_candidate["author-mention"]}*
 ||Submit your gremlins in {thread.jump_url}||'''
@@ -390,6 +392,6 @@ async def on_ready():
     await bot.tree.sync()
 
     print("Connected")
-    publish_candidate.start()
+    await publish_candidate()
 
 bot.run(TOKEN)

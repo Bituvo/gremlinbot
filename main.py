@@ -65,7 +65,7 @@ class SetDescriptionModal(ui.Modal):
         except discord.errors.NotFound:
             await interaction.response.send_message(
                 f"Gremlin description set!",
-                ephemeral=True
+                ephemeral = True
             )
 
 class SetDescriptionView(ui.View):

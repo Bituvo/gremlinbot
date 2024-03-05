@@ -153,6 +153,22 @@ class ConfirmClearCandidatesView(ui.View):
     async def cancel(self, interaction, button):
         await interaction.response.edit_message(content="Candidate deletion cancelled.", view=None)
 
+class ConfirmClearElectedView(ui.View):
+    def __init__(self):
+        super().__init__()
+    
+    @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
+    async def clear_candidates(self, interaction, button):
+        global elected_message_ids
+        elected_message_ids = []
+        save_data()
+
+        await interaction.response.edit_message(content="Elected gremlins cleared!", view=None)
+
+    @ui.button(label="Cancel", style=discord.ButtonStyle.primary)
+    async def cancel(self, interaction, button):
+        await interaction.response.edit_message(content="Elected gremlin deletion cancelled.", view=None)
+
 @app_commands.context_menu(name="Add gremlin as candidate")
 async def add_as_candidate(interaction, message: discord.Message):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
@@ -291,6 +307,26 @@ async def clear_candidates(interaction):
     await reply(
         "Are you sure you want to clear the list of gremlin candidates? **This action is irreversible!**",
         view = ConfirmClearCandidatesView()
+    )
+
+@bot.tree.command(
+    name = "clearelected",
+    description = "Clears the internal list of elected gremlins"
+)
+async def clear_elected(interaction):
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
+
+    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+        await reply("You do not have the necessary permissions.")
+        return
+
+    if not elected_message_ids:
+        await reply("The list of elected gremlins is already empty.")
+        return
+    
+    await reply(
+        "Are you sure you want to clear the list of elected gremlins? **This action is irreversible! Double elections can occur!**",
+        view = ConfirmClearElectedView()
     )
 
 weight_function = lambda x: max(-4 * x ** 2 + 0.6, 0.5 * (x + 0.3) ** 2)

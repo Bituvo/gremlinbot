@@ -1,5 +1,5 @@
 from math import ceil
-from datetime import time
+from datetime import datetime, timedelta, time
 from dotenv import load_dotenv
 from gzip import compress, decompress
 from json import loads, dumps
@@ -403,12 +403,22 @@ async def publish_election(channel, elected_candidate, forced):
         suppress_embeds = True
     )
 
+def monthly_candidate_cleanse():
+    global candidates
+
+    now = datetime.now()
+    current_month = now.month
+    if (now + timedelta(days=1)).month != current_month:
+        candidates = sorted(candidates, key=lambda candidate: candidate["message-id"])[-5:]
+
 @tasks.loop(time=NOON_EST)
 async def publish_candidate(forced=False):
     if candidates:
         channel = bot.get_channel(GREMLINS_ID)
         elected_candidate = elect_candidate()
         await publish_election(channel, elected_candidate, forced)
+
+    monthly_candidate_cleanse()
 
     save_data()
 

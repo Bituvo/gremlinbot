@@ -1,5 +1,4 @@
 from math import ceil
-from pytz import timezone
 from datetime import time
 from dotenv import load_dotenv
 from gzip import compress, decompress
@@ -24,7 +23,7 @@ GREMLINS_ID = int(environ.get("GREMLINS_ID"))
 THREAD_ID = int(environ.get("THREAD_ID"))
 CANDIDATES_PER_PAGE = 10
 ACCENT = 0x1199ff
-NOON_EST = time(hour=12, tzinfo=timezone("EST"))
+NOON_EST = time(hour=17)
 
 intents = discord.Intents.default()
 intents.message_content = True

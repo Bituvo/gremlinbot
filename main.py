@@ -183,7 +183,6 @@ class ForceElectionView(ui.View):
             del candidates[self.candidate_index]
 
         elected_message_ids.append(self.message.id)
-        amount_elected += 1
 
         channel = bot.get_channel(GREMLINS_ID)
         await publish_election(channel, {
@@ -194,7 +193,7 @@ class ForceElectionView(ui.View):
             "message-url": self.message.jump_url,
             "message-id": self.message.id,
             "description": self.message.content
-        })
+        }, True)
 
         await interaction.response.edit_message(
             content = "Gremlin elected!",
@@ -458,10 +457,14 @@ def elect_candidate():
 
     return elected_candidate
 
-async def publish_election(channel, elected_candidate):
+async def publish_election(channel, elected_candidate, forced):
     thread = channel.get_thread(THREAD_ID)
-    content = f'''
-# Gremlin of the Day #{amount_elected}
+
+    if forced:
+        content = "# Bonus Gremlin!"
+    else:
+        content = f"# Gremlin of the Day #{amount_elected}"
+    content += f'''
 ## "{elected_candidate["description"]}"
 *Submitted by {elected_candidate["author-mention"]}*
 ||Submit your gremlins in {thread.jump_url}||'''

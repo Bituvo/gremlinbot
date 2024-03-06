@@ -159,8 +159,10 @@ class ConfirmClearElectedView(ui.View):
     
     @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
     async def clear_candidates(self, interaction, button):
-        global elected_message_ids
+        global amount_elected, elected_message_ids
+
         elected_message_ids = []
+        amount_elected = 0
         save_data()
 
         await interaction.response.edit_message(content="Elected gremlins cleared!", view=None)
@@ -325,7 +327,8 @@ async def clear_elected(interaction):
         return
     
     await reply(
-        "Are you sure you want to clear the list of elected gremlins? **This action is irreversible! Double elections can occur!**",
+        "Are you sure you want to clear the list of elected gremlins?\n" + 
+        "***This action is irreversible!*** The day count will reset to 0, and **double elections can occur!**",
         view = ConfirmClearElectedView()
     )
 

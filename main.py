@@ -18,7 +18,7 @@ load_dotenv(join(getcwd(), ".env"))
 TOKEN = environ.get("TOKEN")
 APPLICATION_ID = int(environ.get("APPLICATION_ID"))
 BOT_USER_ID = int(environ.get("BOT_USER_ID"))
-ADMIN_ROLE_ID = int(environ.get("ADMIN_ROLE_ID"))
+ROLE_ID = int(environ.get("ROLE_ID"))
 GREMLINS_ID = int(environ.get("GREMLINS_ID"))
 THREAD_ID = int(environ.get("THREAD_ID"))
 CANDIDATES_PER_PAGE = 10
@@ -173,7 +173,7 @@ class ConfirmClearElectedView(ui.View):
 async def add_as_candidate(interaction, message: discord.Message):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
 
@@ -223,7 +223,7 @@ async def add_as_candidate(interaction, message: discord.Message):
 async def remove_from_candidates(interaction, message: discord.Message):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
 
@@ -249,7 +249,7 @@ async def remove_from_candidates(interaction, message: discord.Message):
 async def set_description(interaction, message: discord.Message):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
 
@@ -279,7 +279,7 @@ bot.tree.add_command(set_description)
 async def list_candidates(interaction):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
     
@@ -296,7 +296,7 @@ async def list_candidates(interaction):
 async def clear_candidates(interaction):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
 
@@ -316,7 +316,7 @@ async def clear_candidates(interaction):
 async def clear_elected(interaction):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-    if not any(role.id == ADMIN_ROLE_ID for role in interaction.user.roles):
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
         await reply("You do not have the necessary permissions.")
         return
 

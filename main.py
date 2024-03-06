@@ -465,7 +465,7 @@ async def publish_election(channel, elected_candidate, forced):
     else:
         content = f"# Gremlin of the Day #{amount_elected}"
     content += f'''
-## "{elected_candidate["description"]}"
+## {f'"{elected_candidate["description"]}"' if elected_candidate["description"] else "*[No description given]*"}
 *Submitted by {elected_candidate["author-mention"]}*
 ||Submit your gremlins in {thread.jump_url}||'''
     

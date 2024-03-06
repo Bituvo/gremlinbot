@@ -169,6 +169,62 @@ class ConfirmClearElectedView(ui.View):
     async def cancel(self, interaction, button):
         await interaction.response.edit_message(content="Elected gremlin deletion cancelled.", view=None)
 
+class ForceElectionView(ui.View):
+    def __init__(self, message, candidate_index):
+        super().__init__()
+        self.message = message
+        self.candidate_index = candidate_index
+
+    @ui.button(label="Elect now", style=discord.ButtonStyle.danger)
+    async def elect_now(self, interaction, button):
+        global amount_elected, elected_message_ids, candidates
+
+        if self.candidate_index is not None:
+            del candidates[self.candidate_index]
+
+        elected_message_ids.append(self.message.id)
+        amount_elected += 1
+
+        channel = bot.get_channel(GREMLINS_ID)
+        await publish_election(channel, {
+            "image-url": self.message.attachments[0].url,
+            "author-name": self.message.author.display_name,
+            "author-avatar-url": self.message.author.display_avatar.url,
+            "author-mention": self.message.author.mention,
+            "message-url": self.message.jump_url,
+            "message-id": self.message.id,
+            "description": self.message.content
+        })
+
+        await interaction.response.edit_message(
+            content = "Gremlin elected!",
+            view = None
+        )
+
+    @ui.button(label="Choose for next election", style=discord.ButtonStyle.primary)
+    async def choose_for_next_election(self, interaction, button):
+        if self.candidate_index is None:
+            candidates.append({
+                "image-url": self.message.attachments[0].url,
+                "author-name": self.message.author.display_name,
+                "author-avatar-url": self.message.author.display_avatar.url,
+                "author-mention": self.message.author.mention,
+                "message-url": self.message.jump_url,
+                "message-id": self.message.id,
+                "description": self.message.content,
+                "manually-elected": True
+            })
+            self.candidate_index = len(candidates) - 1
+
+        await interaction.response.edit_message(
+            content = "Gremlin will be picked for the next election.",
+            view = None
+        )
+
+    @ui.button(label="Cancel", style=discord.ButtonStyle.primary)
+    async def cancel(self, interaction, button):
+        await interaction.response.edit_message(content="Forced gremlin election cancelled.", view=None)
+
 @app_commands.context_menu(name="Add gremlin as candidate")
 async def add_as_candidate(interaction, message: discord.Message):
     reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
@@ -268,9 +324,46 @@ async def set_description(interaction, message: discord.Message):
     
     await interaction.response.send_modal(SetDescriptionModal(candidate_index))
 
+@app_commands.context_menu(name="Force gremlin election")
+async def force_election(interaction, message: discord.Message):
+    reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
+
+    if not any(role.id == ROLE_ID for role in interaction.user.roles):
+        await reply("You do not have the necessary permissions.")
+        return
+
+    if message.channel.id != THREAD_ID:
+        await reply("You must be in the gremlin thread.")
+        return
+    
+    attachment_found = False
+    if message.attachments and len(message.attachments) == 1:
+        attachment = message.attachments[0]
+        if "image" in attachment.content_type:
+            attachment_found = True
+
+    if not attachment_found:
+        await reply("Gremlin not found. Make sure that the message has one picture.")
+        return
+    
+    if message.id in elected_message_ids:
+        await reply("This gremlin has already been elected!")
+        return
+    
+    candidate_index = next(
+        (i for i, candidate in enumerate(candidates) if candidate["message-id"] == message.id),
+        None
+    )
+
+    await reply(
+        "Should this gremlin be elected now, or for the next election?",
+        view = ForceElectionView(message, candidate_index)
+    )
+
 bot.tree.add_command(add_as_candidate)
 bot.tree.add_command(remove_from_candidates)
 bot.tree.add_command(set_description)
+bot.tree.add_command(force_election)
 
 @bot.tree.command(
     name = "gremlincandidates",
@@ -338,7 +431,17 @@ def elect_candidate():
         elected_candidate = candidates.pop(0)
         elected_message_ids.append(elected_candidate["message-id"])
         amount_elected += 1
+        save_data()
+
         return elected_candidate
+    
+    for i, candidate in enumerate(candidates):
+        if candidate["manually-elected"]:
+            elected_candidate = candidates.pop(i)
+            elected_message_ids.append(elected_candidate["message-id"])
+            amount_elected += 1
+
+            return elected_candidate
 
     message_ids = [candidate["message-id"] for candidate in candidates]
     delta = max(message_ids) - min(message_ids)
@@ -375,6 +478,8 @@ async def publish_election(channel, elected_candidate):
         ),
         suppress_embeds = True
     )
+
+    save_data()
 
 @tasks.loop(time=NOON_EST)
 async def publish_candidate():

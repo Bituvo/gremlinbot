@@ -1,8 +1,6 @@
 from math import ceil
 from datetime import datetime, timedelta, time
 from dotenv import load_dotenv
-from gzip import compress, decompress
-from json import loads, dumps
 from random import choices
 from urllib.parse import urlparse
 from os import getcwd, environ
@@ -12,6 +10,7 @@ from discord.ext import tasks, commands
 from discord import app_commands, ui
 import discord
 import aiohttp
+import data
 
 load_dotenv(join(getcwd(), ".env"))
 
@@ -33,20 +32,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="/", intents=intents, application_id=APPLICATION_ID)
 
-def load_data():
-    with open("gremlins.dat", "rb") as file:
-        return loads(decompress(file.read())).values()
-    
-def save_data():
-    with open("gremlins.dat", "wb") as file:
-        file.write(compress(dumps({
-            "amount-elected": amount_elected,
-            "elected-message-ids": elected_message_ids,
-            "candidates": candidates
-        }).encode()))
-
-amount_elected, elected_message_ids, candidates = load_data()
-
 class SetDescriptionModal(ui.Modal):
     def __init__(self, index, title="Gremlin Description"):
         super().__init__(title=title)
@@ -54,8 +39,8 @@ class SetDescriptionModal(ui.Modal):
         self.add_item(ui.TextInput(label="New description"))
 
     async def on_submit(self, interaction):
-        candidates[self.index]["description"] = self.children[0].value
-        save_data()
+        data.candidates[self.index]["description"] = self.children[0].value
+        data.save_data()
 
         try:
             await interaction.response.edit_message(
@@ -80,14 +65,14 @@ class AddDescriptionView(ui.View):
 class PaginatedCandidatesView(ui.View):
     def __init__(self):
         super().__init__()
-        self.total_pages = ceil(len(candidates) / CANDIDATES_PER_PAGE)
+        self.total_pages = ceil(len(data.candidates) / CANDIDATES_PER_PAGE)
         self.page = 1
 
     async def get_page(self):
-        embed = discord.Embed(title=f"Gremlin Candidates ({len(candidates)})", color=ACCENT)
+        embed = discord.Embed(title=f"Gremlin Candidates ({len(data.candidates)})", color=ACCENT)
     
         start_index = (self.page - 1) * CANDIDATES_PER_PAGE
-        candidates_to_show = candidates[start_index:start_index + CANDIDATES_PER_PAGE]
+        candidates_to_show = data.candidates[start_index:start_index + CANDIDATES_PER_PAGE]
 
         for i, candidate in enumerate(candidates_to_show):
             name = candidate["description"] or "[No description given]"
@@ -143,9 +128,8 @@ class ConfirmClearCandidatesView(ui.View):
     
     @ui.button(label="Clear all candidates", style=discord.ButtonStyle.danger)
     async def clear_candidates(self, interaction, button):
-        global candidates
-        candidates = []
-        save_data()
+        data.candidates = []
+        data.save_data()
 
         await interaction.response.edit_message(content="Gremlin candidates cleared!", view=None)
 
@@ -158,12 +142,10 @@ class ConfirmClearElectedView(ui.View):
         super().__init__()
     
     @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
-    async def clear_candidates(self, interaction, button):
-        global amount_elected, elected_message_ids
-
-        elected_message_ids = []
-        amount_elected = 0
-        save_data()
+    async def clear_elected(self, interaction, button):
+        data.elected_message_ids = []
+        data.amount_elected = 0
+        data.save_data()
 
         await interaction.response.edit_message(content="Elected gremlins cleared!", view=None)
 
@@ -193,16 +175,16 @@ async def add_as_candidate(interaction, message: discord.Message):
         await reply("Gremlin not found. Make sure that the message has one picture.")
         return
     
-    if any(candidate["message-id"] == message.id for candidate in candidates):
+    if any(candidate["message-id"] == message.id for candidate in data.candidates):
         await reply("This gremlin is already in the list of candidates.")
         return
     
-    if message.id in elected_message_ids:
+    if message.id in data.elected_message_ids:
         await reply("This gremlin has already been elected!")
         return
     
-    index = len(candidates)
-    candidates.append({
+    index = len(data.candidates)
+    data.candidates.append({
         "image-url": message.attachments[0].url,
         "author-name": message.author.display_name,
         "author-avatar-url": message.author.display_avatar.url,
@@ -211,7 +193,7 @@ async def add_as_candidate(interaction, message: discord.Message):
         "message-id": message.id,
         "description": message.content
     })
-    save_data()
+    data.save_data()
 
     if message.content:
         await reply(f"Gremlin added! ID: **`#{index + 1}`**")
@@ -234,7 +216,7 @@ async def remove_from_candidates(interaction, message: discord.Message):
         return
 
     candidate_index = next(
-        (i for i, candidate in enumerate(candidates) if candidate["message-id"] == message.id),
+        (i for i, candidate in enumerate(data.candidates) if candidate["message-id"] == message.id),
         None
     )
 
@@ -242,8 +224,8 @@ async def remove_from_candidates(interaction, message: discord.Message):
         await reply("This message is not in the list of candidates.")
         return
     
-    del candidates[candidate_index]
-    save_data()
+    del data.candidates[candidate_index]
+    data.save_data()
 
     await reply(f"Removed candidate with ID **`{candidate_index + 1}`**.")
 
@@ -260,7 +242,7 @@ async def set_description(interaction, message: discord.Message):
         return
     
     candidate_index = next(
-        (i for i, candidate in enumerate(candidates) if candidate["message-id"] == message.id),
+        (i for i, candidate in enumerate(data.candidates) if candidate["message-id"] == message.id),
         None
     )
 
@@ -285,7 +267,7 @@ async def list_candidates(interaction):
         await reply("You do not have the necessary permissions.")
         return
     
-    if not candidates:
+    if not data.candidates:
         await reply("There are no gremlin candidates to view.")
         return
 
@@ -302,7 +284,7 @@ async def clear_candidates(interaction):
         await reply("You do not have the necessary permissions.")
         return
 
-    if not candidates:
+    if not data.candidates:
         await reply("The list of gremlin candidates is already empty.")
         return
     
@@ -322,7 +304,7 @@ async def clear_elected(interaction):
         await reply("You do not have the necessary permissions.")
         return
 
-    if not elected_message_ids:
+    if not data.elected_message_ids:
         await reply("The list of elected gremlins is already empty.")
         return
     
@@ -343,7 +325,7 @@ async def force_election(interaction):
         await reply("You do not have the necessary permissions.")
         return
 
-    if not candidates:
+    if not data.candidates:
         await reply("There are no gremlin candidates.")
         return
     
@@ -353,25 +335,23 @@ async def force_election(interaction):
 weight_function = lambda x: max(-4 * x ** 2 + 0.6, 0.5 * (x + 0.3) ** 2)
 
 def elect_candidate():
-    global amount_elected, elected_message_ids, candidates
-
-    if len(candidates) == 1:
-        elected_candidate = candidates.pop(0)
-        elected_message_ids.append(elected_candidate["message-id"])
+    if len(data.candidates) == 1:
+        elected_candidate = data.candidates.pop(0)
+        data.elected_message_ids.append(elected_candidate["message-id"])
 
         return elected_candidate
 
-    message_ids = [candidate["message-id"] for candidate in candidates]
+    message_ids = [candidate["message-id"] for candidate in data.candidates]
     delta = max(message_ids) - min(message_ids)
     weights = [weight_function((message_id - min(message_ids)) / delta) for message_id in message_ids]
 
     elected_candidate_index = choices(
-        population = range(len(candidates)),
+        population = range(len(data.candidates)),
         weights = weights
     )[0]
 
-    elected_candidate = candidates.pop(elected_candidate_index)
-    elected_message_ids.append(elected_candidate["message-id"])
+    elected_candidate = data.candidates.pop(elected_candidate_index)
+    data.elected_message_ids.append(elected_candidate["message-id"])
 
     return elected_candidate
 
@@ -404,23 +384,21 @@ async def publish_election(channel, elected_candidate, forced):
     )
 
 def monthly_candidate_cleanse():
-    global candidates
-
     now = datetime.now()
     current_month = now.month
     if (now + timedelta(days=1)).month != current_month:
-        candidates = sorted(candidates, key=lambda candidate: candidate["message-id"])[-5:]
+        data.candidates = sorted(data.candidates, key=lambda candidate: candidate["message-id"])[-5:]
 
 @tasks.loop(time=NOON_EST)
 async def publish_candidate(forced=False):
-    if candidates:
+    if data.candidates:
         channel = bot.get_channel(GREMLINS_ID)
         elected_candidate = elect_candidate()
         await publish_election(channel, elected_candidate, forced)
 
     monthly_candidate_cleanse()
 
-    save_data()
+    data.save_data()
 
 @bot.event
 async def on_ready():

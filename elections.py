@@ -33,15 +33,13 @@ def elect_candidate():
     return elected_candidate
 
 async def publish_election(channel, elected_candidate, forced):
-    global amount_elected
-
     thread = channel.get_thread(data.THREAD_ID)
 
     if forced:
         content = "# Bonus Gremlin!"
     else:
-        amount_elected += 1
-        content = f"# Gremlin of the Day #{amount_elected}"
+        data.amount_elected += 1
+        content = f"# Gremlin of the Day #{data.amount_elected}"
     content += f'''
 ## {f'"{elected_candidate["description"]}"' if elected_candidate["description"] else "*[No description given]*"}
 *Submitted by {elected_candidate["author-mention"]}*

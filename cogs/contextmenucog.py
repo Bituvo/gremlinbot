@@ -1,7 +1,8 @@
 from discord.ext import commands
 from discord import app_commands
+from os import path
 import sys
-sys.path.append("../gremlinbot")
+sys.path.insert(1, path.join(sys.path[0], ".."))
 import data
 import discord
 import uiclasses

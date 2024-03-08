@@ -7,12 +7,12 @@ import data
 import uiclasses
 import tasks
 
-class Election(commands.Cog):
+class Election(commands.GroupCog, group_name="elections"):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name = "clearelected",
+        name = "clear",
         description = "Clears the internal list of elected gremlins"
     )
     async def clear_elected(self, interaction):
@@ -33,7 +33,7 @@ class Election(commands.Cog):
         )
 
     @app_commands.command(
-        name = "forceelection",
+        name = "force",
         description = "Forces an election to occur"
     )
     async def force_election(self, interaction):

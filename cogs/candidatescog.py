@@ -5,14 +5,13 @@ import sys
 sys.path.insert(1, path.join(sys.path[0], ".."))
 import data
 import uiclasses
-import tasks
 
-class Candidates(commands.Cog):
+class Candidates(commands.GroupCog, group_name="candidates"):
     def __init__(self, bot):
         self.bot = bot
 
     @app_commands.command(
-        name = "gremlincandidates",
+        name = "list",
         description = "List all gremlin candidates"
     )
     async def list_candidates(self, interaction):
@@ -29,7 +28,7 @@ class Candidates(commands.Cog):
         await uiclasses.PaginatedCandidatesView().initial_page(interaction)
 
     @app_commands.command(
-        name = "clearcandidates",
+        name = "clear",
         description = "Clears all gremlin candidates"
     )
     async def clear_candidates(self, interaction):

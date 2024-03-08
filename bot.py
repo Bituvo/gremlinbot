@@ -13,9 +13,9 @@ class GremlinBot(commands.Bot):
         super().__init__(command_prefix="/", intents=intents, application_id=data.APPLICATION_ID)
 
     async def setup_hook(self):
-        await self.load_extension("cogs.contextmenucog")
-        await self.load_extension("cogs.candidatescog")
-        await self.load_extension("cogs.electioncog")
-        await self.load_extension("cogs.configcog")
+        await self.load_extension("cogs.contextmenu")
+        await self.load_extension("cogs.candidates")
+        await self.load_extension("cogs.election")
+        await self.load_extension("cogs.config")
 
 bot = GremlinBot()

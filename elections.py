@@ -33,7 +33,7 @@ def elect_candidate():
     return elected_candidate
 
 async def publish_election(channel, elected_candidate, forced):
-    thread = channel.get_thread(data.THREAD_ID)
+    thread = channel.get_thread(data.config.get("submissions"))
 
     if forced:
         content = "# Bonus Gremlin!"

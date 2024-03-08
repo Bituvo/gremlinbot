@@ -33,11 +33,11 @@ class ContextMenu(commands.Cog):
     async def add_as_candidate(self, interaction, message: discord.Message):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not any(role.id == data.ROLE_ID for role in interaction.user.roles):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await reply("You do not have the necessary permissions.")
             return
 
-        if message.channel.id != data.THREAD_ID:
+        if message.channel.id != data.config.get("submissions"):
             await reply("You must be in the gremlin thread.")
             return
 
@@ -82,11 +82,11 @@ class ContextMenu(commands.Cog):
     async def remove_from_candidates(self, interaction, message: discord.Message):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not any(role.id == data.ROLE_ID for role in interaction.user.roles):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await reply("You do not have the necessary permissions.")
             return
 
-        if message.channel.id != data.THREAD_ID:
+        if message.channel.id != data.config.get("submissions"):
             await reply("You must be in the gremlin thread.")
             return
 
@@ -107,11 +107,11 @@ class ContextMenu(commands.Cog):
     async def set_description(self, interaction, message: discord.Message):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not any(role.id == data.ROLE_ID for role in interaction.user.roles):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await reply("You do not have the necessary permissions.")
             return
 
-        if message.channel.id != data.THREAD_ID:
+        if message.channel.id != data.config.get("submissions"):
             await reply("You must be in the gremlin thread.")
             return
         

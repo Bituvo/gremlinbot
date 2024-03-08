@@ -18,7 +18,7 @@ class Election(commands.GroupCog, group_name="elections"):
     async def clear_elected(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not any(role.id == data.ROLE_ID for role in interaction.user.roles):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await reply("You do not have the necessary permissions.")
             return
 
@@ -39,7 +39,7 @@ class Election(commands.GroupCog, group_name="elections"):
     async def force_election(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not any(role.id == data.ROLE_ID for role in interaction.user.roles):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await reply("You do not have the necessary permissions.")
             return
 

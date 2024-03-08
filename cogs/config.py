@@ -39,6 +39,19 @@ class Config(commands.GroupCog, group_name="config"):
             suppress_embeds = True,
             ephemeral = True
         )
+
+    @app_commands.command(
+        name = "role",
+        description = "Set the role required to manage gremlins"
+    )
+    @app_commands.describe(roleid="Role ID")
+    async def set_submissions_channel(self, interaction, roleid: str):
+        config.set(role=int(roleid))
+
+        await interaction.response.send_message(
+            "Gremlin management role set.",
+            ephemeral = True
+        )
     
     @app_commands.command(
         name = "election-time",
@@ -51,7 +64,6 @@ class Config(commands.GroupCog, group_name="config"):
 
         await interaction.response.send_message(
             f"Daily election time set to {hour}:00 GMT.",
-            suppress_embeds = True,
             ephemeral = True
         )
 

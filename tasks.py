@@ -16,7 +16,7 @@ def monthly_candidate_cleanse():
 @tasks.loop(time=time(hour=data.config.get("electionhour", 17)))
 async def publish_candidate(forced=False):
     if data.candidates:
-        channel = bot.bot.get_channel(data.GREMLINS_ID)
+        channel = bot.bot.get_channel(data.config.get("elections"))
         elected_candidate = elections.elect_candidate()
         await elections.publish_election(channel, elected_candidate, forced)
 

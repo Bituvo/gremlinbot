@@ -16,5 +16,6 @@ class GremlinBot(commands.Bot):
         await self.load_extension("cogs.contextmenucog")
         await self.load_extension("cogs.candidatescog")
         await self.load_extension("cogs.electioncog")
+        await self.load_extension("cogs.configcog")
 
 bot = GremlinBot()

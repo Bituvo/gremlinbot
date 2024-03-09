@@ -3,7 +3,6 @@ from json import loads, dumps
 from dotenv import load_dotenv
 from os import getcwd, environ
 from os.path import join
-from datetime import time
 import configparser
 
 class Config:
@@ -50,15 +49,16 @@ def save_data():
 amount_elected, elected_message_ids, candidates = load_data()
 
 def add_candidate(message):
-    candidates.append({
-        "image-url": message.attachments[0].url,
-        "author-name": message.author.display_name,
-        "author-avatar-url": message.author.display_avatar.url,
-        "author-mention": message.author.mention,
-        "message-url": message.jump_url,
-        "message-id": message.id,
-        "description": message.content
-    })
+    for attachment in message.attachments:
+        candidates.append({
+            "content-url": attachment.url,
+            "author-name": message.author.display_name,
+            "author-avatar-url": message.author.display_avatar.url,
+            "author-mention": message.author.mention,
+            "message-url": message.jump_url,
+            "message-id": message.id,
+            "description": message.content
+        })
 
     save_data()
 

@@ -3,6 +3,7 @@ from discord import app_commands
 from os import path
 import sys
 sys.path.insert(1, path.join(sys.path[0], ".."))
+import utils
 import data
 import discord
 import uiclasses
@@ -41,14 +42,8 @@ class ContextMenu(commands.Cog):
             await reply("You must be in the gremlin thread.")
             return
 
-        attachment_found = False
-        if message.attachments and len(message.attachments) == 1:
-            attachment = message.attachments[0]
-            if "image" in attachment.content_type:
-                attachment_found = True
-
-        if not attachment_found:
-            await reply("Gremlin not found. Make sure that the message has one picture.")
+        if not utils.is_eligible_candidate(message):
+            await reply("The message doesn't seem to contain any gremlins.")
             return
         
         if any(candidate["message-id"] == message.id for candidate in data.candidates):

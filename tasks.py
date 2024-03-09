@@ -1,9 +1,7 @@
 from discord.ext import tasks
-from os import path
-from datetime import datetime, timedelta, time
-import sys
-sys.path.insert(1, path.join(sys.path[0], ".."))
+from datetime import time
 import data
+import utils
 import elections
 import bot
 
@@ -17,9 +15,7 @@ def check_for_cleanse():
     if not data.config.get("monthlycleanse"):
         return
 
-    now = datetime.now()
-    current_month = now.month
-    if (now + timedelta(days=1)).month != current_month:
+    if utils.is_last_day_of_month():
         remainders = data.config.get("cleanseremainders")
 
         if remainders:

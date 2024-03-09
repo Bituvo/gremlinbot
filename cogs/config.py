@@ -169,12 +169,12 @@ class Config(commands.GroupCog, group_name="config"):
         )
         embed.add_field(
             name = "Cleanse remainders (`cleanseremainders`)",
-            value = f"{config_cleanseremainders}",
+            value = f"{config_cleanseremainders} {'post' if config_cleanseremainders == 1 else 'posts'}",
             inline = False
         )
         embed.add_field(
             name = "Current day count",
-            value = data.day_count,
+            value = f"{data.day_count} {'day' if data.day_count == 1 else 'days'}",
             inline = False
         )
 

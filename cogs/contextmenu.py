@@ -59,17 +59,7 @@ class ContextMenu(commands.Cog):
             await reply("This gremlin has already been elected!")
             return
         
-        index = len(data.candidates)
-        data.candidates.append({
-            "image-url": message.attachments[0].url,
-            "author-name": message.author.display_name,
-            "author-avatar-url": message.author.display_avatar.url,
-            "author-mention": message.author.mention,
-            "message-url": message.jump_url,
-            "message-id": message.id,
-            "description": message.content
-        })
-        data.save_data()
+        index = data.add_candidate(message)
 
         if message.content:
             await reply(f"Gremlin added! ID: **`#{index + 1}`**")

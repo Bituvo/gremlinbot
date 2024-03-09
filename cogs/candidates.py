@@ -7,7 +7,7 @@ import data
 import uiclasses
 
 class Candidates(commands.GroupCog, group_name="candidates"):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
     
     async def interaction_check(self, interaction):
@@ -77,6 +77,43 @@ class Candidates(commands.GroupCog, group_name="candidates"):
             message,
             view = uiclasses.ConfirmCleanseCandidatesView()
         )
+    
+    @app_commands.command(
+        name = "legacyscan",
+        description = "Scans the submissions thread for legacy-reacted gremlins"
+    )
+    @app_commands.describe(limit="Message limit")
+    async def legacy_scan(self, interaction, limit: int):
+        reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
+
+        if limit <= 0:
+            await reply("Please input a valid limit.")
+            return
+
+        channel = self.bot.get_channel(data.config.get("elections"))
+        thread = channel.get_thread(data.config.get("submissions"))
+
+        amount_added = 0
+        total = 0
+
+        async for message in thread.history(limit=limit):
+            if not any(candidate["message-id"] == message.id for candidate in data.candidates):
+                for reaction in message.reactions:
+                    if reaction.emoji == "⭐":
+                        async for user in reaction.users():
+                            if user.id in [466987423046565908, 456226577798135808]:
+                                data.add_candidate(message)
+                                amount_added += 1
+
+            total += 1
+        
+        message = f"{amount_added} / {total} gremlins"
+        if amount_added == 1:
+            message += " was added."
+        else:
+            message += " were added."
+
+        await reply(message)
 
 async def setup(bot):
     await bot.add_cog(Candidates(bot))

@@ -48,3 +48,18 @@ def save_data():
         }).encode()))
 
 amount_elected, elected_message_ids, candidates = load_data()
+
+def add_candidate(message):
+    candidates.append({
+        "image-url": message.attachments[0].url,
+        "author-name": message.author.display_name,
+        "author-avatar-url": message.author.display_avatar.url,
+        "author-mention": message.author.mention,
+        "message-url": message.jump_url,
+        "message-id": message.id,
+        "description": message.content
+    })
+
+    save_data()
+
+    return len(candidates) - 1

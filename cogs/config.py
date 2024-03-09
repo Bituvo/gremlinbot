@@ -80,6 +80,41 @@ class Config(commands.GroupCog, group_name="config"):
             f"Daily election time set to {hour}:00 GMT.",
             ephemeral = True
         )
+    
+    @app_commands.command(
+        name = "view",
+        description = "View current configuration"
+    )
+    async def view_config(self, interaction):
+        config_elections = config.get("elections")
+        config_submissions = config.get("submissions")
+        config_electionhour = config.get("electionhour")
+        config_role = config.get("role")
+
+        embed = discord.Embed(title="Gremlin Bot Configuration")
+
+        embed.add_field(
+            name = "Election channel (`elections`)",
+            value = f"{config_elections} (<#{config_elections}>)",
+            inline = False
+        )
+        embed.add_field(
+            name = "Submission thread (`submissions`)",
+            value = f"{config_submissions} (<#{config_submissions}>)",
+            inline = False
+        )
+        embed.add_field(
+            name = "Management role (`role`)",
+            value = f"{config_role} (<@&{config_role}>)",
+            inline = False
+        )
+        embed.add_field(
+            name = "Daily election hour (`electionhour`)",
+            value = f"{config_electionhour} (<t:{config_electionhour * 3600}:t>)",
+            inline = False
+        )
+
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
 async def setup(bot):
     await bot.add_cog(Config(bot))

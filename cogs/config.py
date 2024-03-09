@@ -88,6 +88,47 @@ class Config(commands.GroupCog, group_name="config"):
         )
     
     @app_commands.command(
+        name = "monthlycleanse",
+        description = "Enable or disable monthly candidate cleanse"
+    )
+    @app_commands.describe(option="Option ('enable' or 'disable')")
+    async def toggle_monthly_cleanse(self, interaction, option: str):
+        option = option.lower()
+
+        if "enable" in option or "disable" in option:
+            config.set(monthlycleanse=(1 if "enable" in option else 0))
+        else:
+            await interaction.response.send_message(
+                "Please input a valid option.",
+                ephemeral = True
+            )
+            return
+
+        await interaction.response.send_message(
+            f"Monthly candidate cleanse {'enabled' if 'enable' in option else 'disabled'}.",
+            ephemeral = True
+        )
+
+    @app_commands.command(
+        name = "cleanseremainders",
+        description = "Set how many of the newest candidates remain after the monthly cleanse"
+    )
+    @app_commands.describe(remainders="Amount of newest candidates to keep")
+    async def set_cleanse_remainders(self, interaction, remainders: int):
+        if remainders >= 0:
+            config.set(cleanseremainders=remainders)
+        else:
+            await interaction.response.send_message(
+                "Please input a valid option.",
+                ephemeral = True
+            )
+            return
+
+        message = f"Monthly cleanse remainder count set to {remainders}."
+        message += (" (Monthly cleanse is disabled)" if not config.get("monthlycleanse") else "")
+        await interaction.response.send_message(message, ephemeral=True)
+
+    @app_commands.command(
         name = "view",
         description = "View current configuration"
     )

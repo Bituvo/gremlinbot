@@ -2,6 +2,7 @@ from discord import ui
 from math import ceil
 import discord
 import data
+import tasks
 
 class SetDescriptionModal(ui.Modal):
     def __init__(self, index, title="Gremlin Description"):
@@ -101,6 +102,20 @@ class ConfirmClearCandidatesView(ui.View):
     async def clear_candidates(self, interaction, button):
         data.candidates = []
         data.save_data()
+
+        await interaction.response.edit_message(content="Gremlin candidates cleared!", view=None)
+
+    @ui.button(label="Cancel", style=discord.ButtonStyle.primary)
+    async def cancel(self, interaction, button):
+        await interaction.response.edit_message(content="Candidate deletion cancelled.", view=None)
+
+class ConfirmCleanseCandidatesView(ui.View):
+    def __init__(self):
+        super().__init__()
+    
+    @ui.button(label="Perform monthly cleanse", style=discord.ButtonStyle.danger)
+    async def clear_candidates(self, interaction, button):
+        tasks.cleanse_candidates(data.config.get("cleanseremainders"))
 
         await interaction.response.edit_message(content="Gremlin candidates cleared!", view=None)
 

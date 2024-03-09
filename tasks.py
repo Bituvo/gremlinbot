@@ -7,11 +7,23 @@ import data
 import elections
 import bot
 
-def monthly_candidate_cleanse():
+sorting_function = lambda candidate: candidate["message-id"]
+
+def cleanse_candidates(remainders):
+    sorted_candidates = sorted(data.candidates, key=sorting_function)
+    data.candidates = sorted_candidates[-remainders:]
+
+def check_for_cleanse():
+    if not data.config.get("monthlycleanse"):
+        return
+
     now = datetime.now()
     current_month = now.month
     if (now + timedelta(days=1)).month != current_month:
-        data.candidates = sorted(data.candidates, key=lambda candidate: candidate["message-id"])[-5:]
+        remainders = data.config.get("cleanseremainders")
+
+        if remainders:
+            cleanse_candidates(remainders)
 
 @tasks.loop(time=time(hour=data.config.get("electionhour", 17)))
 async def publish_candidate(forced=False):
@@ -20,6 +32,6 @@ async def publish_candidate(forced=False):
         elected_candidate = elections.elect_candidate()
         await elections.publish_election(channel, elected_candidate, forced)
 
-    monthly_candidate_cleanse()
+    check_for_cleanse()
 
     data.save_data()

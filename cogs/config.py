@@ -140,7 +140,7 @@ class Config(commands.GroupCog, group_name="config"):
         config_monthlycleanse = data.config.get("monthlycleanse")
         config_cleanseremainders = data.config.get("cleanseremainders")
 
-        embed = discord.Embed(title="Gremlin Bot Configuration")
+        embed = discord.Embed(title="Gremlin Bot Configuration", color=data.ACCENT)
 
         embed.add_field(
             name = "Election channel (`elections`)",

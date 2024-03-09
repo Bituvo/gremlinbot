@@ -15,7 +15,7 @@ def elect_candidate():
         return elected_candidate
 
     message_ids = [candidate["message-id"] for candidate in data.candidates]
-    delta = max(message_ids) - min(message_ids)
+    delta = (max(message_ids) - min(message_ids)) or 1
     weights = [utils.weight_function((message_id - min(message_ids)) / delta) for message_id in message_ids]
 
     elected_candidate_index = choices(

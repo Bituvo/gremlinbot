@@ -34,8 +34,8 @@ async def publish_election(channel, elected_candidate, forced):
     if forced:
         content = "# Bonus Gremlin!\n"
     else:
-        data.amount_elected += 1
-        content = f"# Gremlin of the Day #{data.amount_elected}\n"
+        data.day_count += 1
+        content = f"# Gremlin of the Day #{data.day_count}\n"
     
     if elected_candidate["description"]:
         content += f"## {f'"{elected_candidate["description"]}"'}\n"

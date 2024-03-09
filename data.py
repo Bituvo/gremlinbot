@@ -41,12 +41,12 @@ def load_data():
 def save_data():
     with open("gremlins.dat", "wb") as file:
         file.write(compress(dumps({
-            "amount-elected": amount_elected,
+            "day-count": day_count,
             "elected-message-ids": elected_message_ids,
             "candidates": candidates
         }).encode()))
 
-amount_elected, elected_message_ids, candidates = load_data()
+day_count, elected_message_ids, candidates = load_data()
 
 def add_candidate(message):
     for attachment in message.attachments:

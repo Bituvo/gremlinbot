@@ -142,7 +142,7 @@ class SetAmountElectedModal(ui.Modal, title="Set Day Count"):
                 view = None
             )
         
-        data.amount_elected = int(user_input)
+        data.day_count = int(user_input)
         data.save_data()
 
         await interaction.response.edit_message(
@@ -165,7 +165,7 @@ class ConfirmClearElectedView(ui.View):
     @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
     async def clear_elected(self, interaction, button):
         data.elected_message_ids = []
-        data.amount_elected = 0
+        data.day_count = 0
         data.save_data()
 
         await interaction.response.edit_message(content="Elected gremlins cleared!", view=None)

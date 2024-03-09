@@ -174,7 +174,7 @@ class Config(commands.GroupCog, group_name="config"):
         )
         embed.add_field(
             name = "Current day count",
-            value = data.amount_elected,
+            value = data.day_count,
             inline = False
         )
 

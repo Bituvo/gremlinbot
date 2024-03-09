@@ -35,7 +35,7 @@ class Election(commands.GroupCog, group_name="elections"):
         )
 
     @app_commands.command(
-        name = "force",
+        name = "bonus",
         description = "Forces an election to occur"
     )
     async def force_election(self, interaction):

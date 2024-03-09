@@ -44,9 +44,11 @@ class Election(commands.GroupCog, group_name="elections"):
         if not data.candidates:
             await reply("There are no gremlin candidates.")
             return
-        
+    
+        await interaction.response.defer(ephemeral=True)
         await tasks.publish_candidate(forced=True)
-        await reply("Bonus gremlin posted!")
+
+        await interaction.followup.send("Bonus gremlin posted!")
     
     @app_commands.command(
         name = "daycount",

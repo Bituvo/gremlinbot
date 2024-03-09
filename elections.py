@@ -36,14 +36,16 @@ async def publish_election(channel, elected_candidate, forced):
     thread = channel.get_thread(data.config.get("submissions"))
 
     if forced:
-        content = "# Bonus Gremlin!"
+        content = "# Bonus Gremlin!\n"
     else:
         data.amount_elected += 1
-        content = f"# Gremlin of the Day #{data.amount_elected}"
-    content += f'''
-## {f'"{elected_candidate["description"]}"' if elected_candidate["description"] else "*[No description given]*"}
-*Submitted by {elected_candidate["author-mention"]}*
-||Submit your gremlins in {thread.jump_url}||'''
+        content = f"# Gremlin of the Day #{data.amount_elected}\n"
+    
+    if elected_candidate["description"]:
+        content += f"## {f'"{elected_candidate["description"]}"'}\n"
+
+    content += (f"*Submitted by {elected_candidate["author-mention"]}*\n" +
+                f"||Submit your gremlins in {thread.jump_url}||")
     
     async with aiohttp.ClientSession() as session:
         async with session.get(elected_candidate["image-url"]) as response:

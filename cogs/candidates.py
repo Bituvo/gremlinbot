@@ -71,9 +71,10 @@ class Candidates(commands.GroupCog, group_name="candidates"):
             message += "candidate?"
         else:
             message += f"{cleanse_remainders} candidates?"
+        message += " **This action is irreversible!**"
 
         await reply(
-            "Are you sure you want to perform the candidate cleanse? **This action is irreversible!**",
+            message,
             view = uiclasses.ConfirmCleanseCandidatesView()
         )
 

@@ -137,6 +137,8 @@ class Config(commands.GroupCog, group_name="config"):
         config_submissions = config.get("submissions")
         config_electionhour = config.get("electionhour")
         config_role = config.get("role")
+        config_monthlycleanse = config.get("monthlycleanse")
+        config_cleanseremainders = config.get("cleanseremainders")
 
         embed = discord.Embed(title="Gremlin Bot Configuration")
 
@@ -158,6 +160,16 @@ class Config(commands.GroupCog, group_name="config"):
         embed.add_field(
             name = "Daily election hour (`electionhour`)",
             value = f"{config_electionhour} (<t:{config_electionhour * 3600}:t>)",
+            inline = False
+        )
+        embed.add_field(
+            name = "Monthly cleanse (`monthlycleanse`)",
+            value = f"{config_monthlycleanse} ({'Enabled' if config_monthlycleanse else 'Disabled'})",
+            inline = False
+        )
+        embed.add_field(
+            name = "Cleanse remainders (`cleanseremainders`)",
+            value = f"{config_cleanseremainders}",
             inline = False
         )
 

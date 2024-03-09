@@ -11,6 +11,12 @@ import discord
 class Config(commands.GroupCog, group_name="config"):
     def __init__(self, bot):
         self.bot = bot
+    
+    async def interaction_check(self, interaction):
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
+        else:
+            return True
 
     @app_commands.command(
         name = "elections",

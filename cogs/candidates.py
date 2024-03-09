@@ -9,6 +9,12 @@ import uiclasses
 class Candidates(commands.GroupCog, group_name="candidates"):
     def __init__(self, bot):
         self.bot = bot
+    
+    async def interaction_check(self, interaction):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
+            await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
+        else:
+            return True
 
     @app_commands.command(
         name = "list",
@@ -16,10 +22,6 @@ class Candidates(commands.GroupCog, group_name="candidates"):
     )
     async def list_candidates(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
-
-        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
-            await reply("You do not have the necessary permissions.")
-            return
         
         if not data.candidates:
             await reply("There are no gremlin candidates to view.")
@@ -33,10 +35,6 @@ class Candidates(commands.GroupCog, group_name="candidates"):
     )
     async def clear_candidates(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
-
-        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
-            await reply("You do not have the necessary permissions.")
-            return
 
         if not data.candidates:
             await reply("The list of gremlin candidates is already empty.")

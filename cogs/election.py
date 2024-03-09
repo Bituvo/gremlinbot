@@ -10,6 +10,12 @@ import tasks
 class Election(commands.GroupCog, group_name="elections"):
     def __init__(self, bot):
         self.bot = bot
+    
+    async def interaction_check(self, interaction):
+        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
+            await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
+        else:
+            return True
 
     @app_commands.command(
         name = "clear",
@@ -17,10 +23,6 @@ class Election(commands.GroupCog, group_name="elections"):
     )
     async def clear_elected(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
-
-        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
-            await reply("You do not have the necessary permissions.")
-            return
 
         if not data.elected_message_ids:
             await reply("The list of elected gremlins is already empty.")
@@ -38,10 +40,6 @@ class Election(commands.GroupCog, group_name="elections"):
     )
     async def force_election(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
-
-        if not any(role.id == data.config.get("role") for role in interaction.user.roles):
-            await reply("You do not have the necessary permissions.")
-            return
 
         if not data.candidates:
             await reply("There are no gremlin candidates.")

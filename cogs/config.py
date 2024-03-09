@@ -46,7 +46,14 @@ class Config(commands.GroupCog, group_name="config"):
     )
     @app_commands.describe(roleid="Role ID")
     async def set_submissions_channel(self, interaction, roleid: str):
-        config.set(role=int(roleid))
+        if roleid.isdigit():
+            config.set(role=int(roleid))
+        else:
+            await interaction.response.send_message(
+                "Please input a valid role ID.",
+                ephemeral = True
+            )
+            return
 
         await interaction.response.send_message(
             "Gremlin management role set.",
@@ -59,8 +66,15 @@ class Config(commands.GroupCog, group_name="config"):
     )
     @app_commands.describe(hour="GMT hour")
     async def set_election_time(self, interaction, hour: int):
-        config.set(electionhour=hour)
-        tasks.publish_candidate.change_interval(time=time(hour=hour))
+        if 0 <= hour <= 24:
+            config.set(electionhour=hour)
+            tasks.publish_candidate.change_interval(time=time(hour=hour))
+        else:
+            await interaction.response.send_message(
+                "Please input a valid hour.",
+                ephemeral = True
+            )
+            return
 
         await interaction.response.send_message(
             f"Daily election time set to {hour}:00 GMT.",

@@ -4,7 +4,7 @@ from datetime import time
 from os import path
 import sys
 sys.path.insert(1, path.join(sys.path[0], ".."))
-from data import config
+import data
 import tasks
 import discord
 
@@ -24,7 +24,7 @@ class Config(commands.GroupCog, group_name="config"):
     )
     @app_commands.describe(channel="Election channel")
     async def set_elections_channel(self, interaction, channel: discord.TextChannel):
-        config.set(elections=channel.id)
+        data.config.set(elections=channel.id)
 
         await interaction.response.send_message(
             f"Gremlin election channel set to {channel.jump_url}.",
@@ -38,7 +38,7 @@ class Config(commands.GroupCog, group_name="config"):
     )
     @app_commands.describe(thread="Submissions thread")
     async def set_submissions_channel(self, interaction, thread: discord.Thread):
-        config.set(submissions=thread.id)
+        data.config.set(submissions=thread.id)
 
         await interaction.response.send_message(
             f"Gremlin submission channel set to {thread.jump_url}.",
@@ -53,7 +53,7 @@ class Config(commands.GroupCog, group_name="config"):
     @app_commands.describe(roleid="Role ID")
     async def set_submissions_channel(self, interaction, roleid: str):
         if roleid.isdigit():
-            config.set(role=int(roleid))
+            data.config.set(role=int(roleid))
         else:
             await interaction.response.send_message(
                 "Please input a valid role ID.",
@@ -73,7 +73,7 @@ class Config(commands.GroupCog, group_name="config"):
     @app_commands.describe(hour="GMT hour")
     async def set_election_time(self, interaction, hour: int):
         if 0 <= hour <= 24:
-            config.set(electionhour=hour)
+            data.config.set(electionhour=hour)
             tasks.publish_candidate.change_interval(time=time(hour=hour))
         else:
             await interaction.response.send_message(
@@ -96,7 +96,7 @@ class Config(commands.GroupCog, group_name="config"):
         option = option.lower()
 
         if "enable" in option or "disable" in option:
-            config.set(monthlycleanse=(1 if "enable" in option else 0))
+            data.config.set(monthlycleanse=(1 if "enable" in option else 0))
         else:
             await interaction.response.send_message(
                 "Please input a valid option.",
@@ -116,7 +116,7 @@ class Config(commands.GroupCog, group_name="config"):
     @app_commands.describe(remainders="Amount of newest candidates to keep")
     async def set_cleanse_remainders(self, interaction, remainders: int):
         if remainders >= 0:
-            config.set(cleanseremainders=remainders)
+            data.config.set(cleanseremainders=remainders)
         else:
             await interaction.response.send_message(
                 "Please input a valid option.",
@@ -125,7 +125,7 @@ class Config(commands.GroupCog, group_name="config"):
             return
 
         message = f"Monthly cleanse remainder count set to {remainders}."
-        message += (" (Monthly cleanse is disabled)" if not config.get("monthlycleanse") else "")
+        message += (" (Monthly cleanse is disabled)" if not data.config.get("monthlycleanse") else "")
         await interaction.response.send_message(message, ephemeral=True)
 
     @app_commands.command(
@@ -133,12 +133,12 @@ class Config(commands.GroupCog, group_name="config"):
         description = "View current configuration"
     )
     async def view_config(self, interaction):
-        config_elections = config.get("elections")
-        config_submissions = config.get("submissions")
-        config_electionhour = config.get("electionhour")
-        config_role = config.get("role")
-        config_monthlycleanse = config.get("monthlycleanse")
-        config_cleanseremainders = config.get("cleanseremainders")
+        config_elections = data.config.get("elections")
+        config_submissions = data.config.get("submissions")
+        config_electionhour = data.config.get("electionhour")
+        config_role = data.config.get("role")
+        config_monthlycleanse = data.config.get("monthlycleanse")
+        config_cleanseremainders = data.config.get("cleanseremainders")
 
         embed = discord.Embed(title="Gremlin Bot Configuration")
 
@@ -170,6 +170,11 @@ class Config(commands.GroupCog, group_name="config"):
         embed.add_field(
             name = "Cleanse remainders (`cleanseremainders`)",
             value = f"{config_cleanseremainders}",
+            inline = False
+        )
+        embed.add_field(
+            name = "Current day count",
+            value = data.amount_elected,
             inline = False
         )
 

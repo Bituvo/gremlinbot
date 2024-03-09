@@ -123,6 +123,41 @@ class ConfirmCleanseCandidatesView(ui.View):
     async def cancel(self, interaction, button):
         await interaction.response.edit_message(content="Candidate deletion cancelled.", view=None)
 
+class SetAmountElectedModal(ui.Modal, title="Set Day Count"):
+    def __init__(self):
+        super().__init__()
+        self.add_item(
+            ui.TextInput(
+                label = "New day count",
+                placeholder = "Daily elections increment this by one"
+            )
+        )
+    
+    async def on_submit(self, interaction):
+        user_input = self.children[0].value
+
+        if not (user_input.isdigit() and int(user_input) >= 0):
+            await interaction.response.edit_message(
+                content = "Please input a valid day count.",
+                view = None
+            )
+        
+        data.amount_elected = int(user_input)
+        data.save_data()
+
+        await interaction.response.edit_message(
+            content = f"Day count set to {user_input}!",
+            view = None
+        )
+
+class SetAmountElectedView(ui.View):
+    def __init__(self):
+        super().__init__()
+
+    @ui.button(label="Set day count", style=discord.ButtonStyle.primary)
+    async def set_day_count(self, interaction, button):
+        await interaction.response.send_modal(SetAmountElectedModal())
+
 class ConfirmClearElectedView(ui.View):
     def __init__(self):
         super().__init__()

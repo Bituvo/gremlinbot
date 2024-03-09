@@ -47,6 +47,20 @@ class Election(commands.GroupCog, group_name="elections"):
         
         await tasks.publish_candidate(forced=True)
         await reply("Bonus gremlin posted!")
+    
+    @app_commands.command(
+        name = "daycount",
+        description = "Get and set the current day count"
+    )
+    async def elected_amount(self, interaction):
+        reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
+
+        if data.amount_elected == 1:
+            message = f"There is currently **1** elected gremlin."
+        else:
+            message = f"There are currently **{data.amount_elected}** elected gremlins."
+
+        await reply(message, view=uiclasses.SetAmountElectedView())
 
 async def setup(bot):
     await bot.add_cog(Election(bot))

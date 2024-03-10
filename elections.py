@@ -1,7 +1,5 @@
 from random import choices
 from io import BytesIO
-from os.path import basename
-from urllib.parse import urlparse
 import data
 import utils
 import discord
@@ -50,7 +48,7 @@ async def publish_election(channel, elected_candidate, forced):
     await channel.send(
         content,
         file = discord.File(
-            filename = basename(urlparse(elected_candidate["content-url"]).path),
+            filename = elected_candidate["filename"],
             fp = buffer
         ),
         suppress_embeds = True

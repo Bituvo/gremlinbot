@@ -52,8 +52,7 @@ def add_candidate(message):
     for attachment in message.attachments:
         candidates.append({
             "content-url": attachment.url,
-            "author-name": message.author.display_name,
-            "author-avatar-url": message.author.display_avatar.url,
+            "filename": attachment.filename,
             "author-mention": message.author.mention,
             "message-url": message.jump_url,
             "message-id": message.id,

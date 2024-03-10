@@ -89,6 +89,8 @@ class Candidates(commands.GroupCog, group_name="candidates"):
         if limit <= 0:
             await reply("Please input a valid limit.")
             return
+        
+        await interaction.response.defer(ephemeral=True)
 
         channel = self.bot.get_channel(data.config.get("elections"))
         thread = channel.get_thread(data.config.get("submissions"))
@@ -98,12 +100,13 @@ class Candidates(commands.GroupCog, group_name="candidates"):
 
         async for message in thread.history(limit=limit):
             if not any(candidate["message-id"] == message.id for candidate in data.candidates):
-                for reaction in message.reactions:
-                    if reaction.emoji == "⭐":
-                        async for user in reaction.users():
-                            if user.id in [466987423046565908, 456226577798135808]:
-                                data.add_candidate(message)
-                                amount_added += 1
+                if not message.id in data.elected_message_ids:
+                    for reaction in message.reactions:
+                        if reaction.emoji == "⭐":
+                            async for user in reaction.users():
+                                if user.id in [466987423046565908, 456226577798135808]:
+                                    data.add_candidate(message)
+                                    amount_added += 1
 
             total += 1
         
@@ -113,7 +116,7 @@ class Candidates(commands.GroupCog, group_name="candidates"):
         else:
             message += " were added."
 
-        await reply(message)
+        await interaction.followup.send(message)
 
 async def setup(bot):
     await bot.add_cog(Candidates(bot))

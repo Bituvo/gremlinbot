@@ -10,7 +10,7 @@ import tasks
 class Election(commands.GroupCog, group_name="elections"):
     def __init__(self, bot):
         self.bot = bot
-    
+
     async def interaction_check(self, interaction):
         if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
@@ -27,9 +27,9 @@ class Election(commands.GroupCog, group_name="elections"):
         if not data.elected_attachment_ids:
             await reply("The list of elected gremlins is already empty.")
             return
-        
+
         await reply(
-            "Are you sure you want to clear the list of elected gremlins?\n" + 
+            "Are you sure you want to clear the list of elected gremlins?\n" +
             "***This action is irreversible!*** The day count will reset to 0, and **double elections can occur!**",
             view = uiclasses.ConfirmClearElectedView()
         )
@@ -44,12 +44,12 @@ class Election(commands.GroupCog, group_name="elections"):
         if not data.candidates:
             await reply("There are no gremlin candidates.")
             return
-    
+
         await interaction.response.defer(ephemeral=True)
         await tasks.publish_candidate(forced=True)
 
         await interaction.followup.send("Bonus gremlin posted!")
-    
+
     @app_commands.command(
         name = "daycount",
         description = "Get and set the current day count"

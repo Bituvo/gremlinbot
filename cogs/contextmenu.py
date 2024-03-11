@@ -46,7 +46,7 @@ class ContextMenu(commands.Cog):
         if not success:
             await reply(why)
             return
-        
+
         indexes = data.add_candidate(message)
         plural = 's' if len(indexes) > 1 else ''
         readable_indexes = f"ID{plural}: **`"
@@ -80,7 +80,7 @@ class ContextMenu(commands.Cog):
         if candidate_index is None:
             await reply("This message is not in the list of candidates.")
             return
-        
+
         del data.candidates[candidate_index]
         data.save_data()
 
@@ -96,13 +96,13 @@ class ContextMenu(commands.Cog):
         if message.channel.id != data.config.get("submissions"):
             await reply("You must be in the gremlin thread.")
             return
-        
+
         candidate_indexes = [i for i, candidate in enumerate(data.candidates) if candidate["message-id"] == message.id]
 
         if not candidate_indexes:
             await reply("This message is not in the list of candidates.")
             return
-        
+
         await interaction.response.send_modal(uiclasses.SetDescriptionModal(candidate_indexes))
 
 async def setup(bot):

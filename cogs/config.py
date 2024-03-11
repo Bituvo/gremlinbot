@@ -11,7 +11,7 @@ import discord
 class Config(commands.GroupCog, group_name="config"):
     def __init__(self, bot):
         self.bot = bot
-    
+
     async def interaction_check(self, interaction):
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
@@ -31,7 +31,7 @@ class Config(commands.GroupCog, group_name="config"):
             suppress_embeds = True,
             ephemeral = True
         )
-    
+
     @app_commands.command(
         name = "submissions",
         description = "Set the submissions thread"
@@ -65,7 +65,7 @@ class Config(commands.GroupCog, group_name="config"):
             "Gremlin management role set.",
             ephemeral = True
         )
-    
+
     @app_commands.command(
         name = "election-time",
         description = "Set the daily election time (GMT)"
@@ -88,7 +88,7 @@ class Config(commands.GroupCog, group_name="config"):
             f"Daily election time set to {hour}:{minute} GMT.",
             ephemeral = True
         )
-    
+
     @app_commands.command(
         name = "monthlycleanse",
         description = "Enable or disable monthly candidate cleanse"

@@ -43,7 +43,7 @@ class PaginatedCandidatesView(ui.View):
 
     async def get_page(self):
         embed = discord.Embed(title=f"Gremlin Candidates ({len(data.candidates)})", color=data.ACCENT)
-    
+
         start_index = (self.page - 1) * data.CANDIDATES_PER_PAGE
         candidates_to_show = data.candidates[start_index:start_index + data.CANDIDATES_PER_PAGE]
 
@@ -54,7 +54,7 @@ class PaginatedCandidatesView(ui.View):
                 value = candidate["message-url"],
                 inline = False
             )
-        
+
         embed.set_footer(text=f"Page {self.page} / {self.total_pages}")
 
         return embed
@@ -98,7 +98,7 @@ class PaginatedCandidatesView(ui.View):
 class ConfirmClearCandidatesView(ui.View):
     def __init__(self):
         super().__init__()
-    
+
     @ui.button(label="Clear all candidates", style=discord.ButtonStyle.danger)
     async def clear_candidates(self, interaction, button):
         data.candidates = []
@@ -113,7 +113,7 @@ class ConfirmClearCandidatesView(ui.View):
 class ConfirmCleanseCandidatesView(ui.View):
     def __init__(self):
         super().__init__()
-    
+
     @ui.button(label="Perform monthly cleanse", style=discord.ButtonStyle.danger)
     async def clear_candidates(self, interaction, button):
         tasks.cleanse_candidates(data.config.get("cleanseremainders"))
@@ -133,7 +133,7 @@ class SetAmountElectedModal(ui.Modal, title="Set Day Count"):
                 placeholder = "Daily elections increment this by one"
             )
         )
-    
+
     async def on_submit(self, interaction):
         user_input = self.children[0].value
 
@@ -142,7 +142,7 @@ class SetAmountElectedModal(ui.Modal, title="Set Day Count"):
                 content = "Please input a valid day count.",
                 view = None
             )
-        
+
         data.day_count = int(user_input)
         data.save_data()
 
@@ -162,7 +162,7 @@ class SetAmountElectedView(ui.View):
 class ConfirmClearElectedView(ui.View):
     def __init__(self):
         super().__init__()
-    
+
     @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
     async def clear_elected(self, interaction, button):
         data.elected_attachment_ids = []

@@ -9,7 +9,7 @@ import uiclasses
 class Candidates(commands.GroupCog, group_name="candidates"):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-    
+
     async def interaction_check(self, interaction):
         if not any(role.id == data.config.get("role") for role in interaction.user.roles):
             await interaction.response.send_message("You do not have the necessary permissions.", ephemeral=True)
@@ -22,7 +22,7 @@ class Candidates(commands.GroupCog, group_name="candidates"):
     )
     async def list_candidates(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
-        
+
         if not data.candidates:
             await reply("There are no gremlin candidates to view.")
             return
@@ -39,12 +39,12 @@ class Candidates(commands.GroupCog, group_name="candidates"):
         if not data.candidates:
             await reply("The list of gremlin candidates is already empty.")
             return
-        
+
         await reply(
             "Are you sure you want to clear the list of gremlin candidates? **This action is irreversible!**",
             view = uiclasses.ConfirmClearCandidatesView()
         )
-    
+
     @app_commands.command(
         name = "cleanse",
         description = "Immediately performs the monthly candidate cleanse"
@@ -77,7 +77,7 @@ class Candidates(commands.GroupCog, group_name="candidates"):
             message,
             view = uiclasses.ConfirmCleanseCandidatesView()
         )
-    
+
     @app_commands.command(
         name = "legacyscan",
         description = "Scans the submissions thread for legacy-reacted gremlins"
@@ -89,7 +89,7 @@ class Candidates(commands.GroupCog, group_name="candidates"):
         if limit <= 0:
             await reply("Please input a valid limit.")
             return
-        
+
         await interaction.response.defer(ephemeral=True)
 
         channel = self.bot.get_channel(data.config.get("elections"))
@@ -108,7 +108,7 @@ class Candidates(commands.GroupCog, group_name="candidates"):
                                 amount_added += 1
 
             total += 1
-        
+
         await interaction.followup.send(f"{amount_added} / {total} messages {'was' if amount_added == 1 else 'were'} added.")
 
 async def setup(bot):

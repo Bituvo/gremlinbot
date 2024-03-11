@@ -12,7 +12,7 @@ class Config:
 
         if "gremlinbot" not in self.parser:
             self.parser.add_section("gremlinbot")
-    
+
     def set(self, **kwargs):
         for key in kwargs.keys():
             self.parser.set("gremlinbot", key, str(kwargs[key]))
@@ -37,7 +37,7 @@ ACCENT = 0x1199ff
 def load_data():
     with open("gremlins.dat", "rb") as file:
         return loads(decompress(file.read())).values()
-    
+
 def save_data():
     with open("gremlins.dat", "wb") as file:
         file.write(compress(dumps({
@@ -64,7 +64,7 @@ def is_eligible(message):
         if len(message.attachments) > 1:
             return False, "These gremlins have already been elected."
         return False, "This gremlin has already been elected."
-    
+
     return True, ""
 
 def add_candidate(message):

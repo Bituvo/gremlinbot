@@ -1,6 +1,6 @@
 from discord.ext import commands
 from discord import app_commands
-from datetime import time
+from datetime import time, timezone
 from os import path
 import sys
 sys.path.insert(1, path.join(sys.path[0], ".."))
@@ -68,22 +68,24 @@ class Config(commands.GroupCog, group_name="config"):
     
     @app_commands.command(
         name = "election-time",
-        description = "Set the daily election time (GMT hour)"
+        description = "Set the daily election time (GMT)"
     )
-    @app_commands.describe(hour="GMT hour")
-    async def set_election_time(self, interaction, hour: int):
-        if 0 <= hour <= 24:
+    @app_commands.describe(hour="Hour")
+    @app_commands.describe(minute="Minute")
+    async def set_election_time(self, interaction, hour: int, minute: int):
+        if 0 <= hour <= 23 and 0 <= minute <= 59:
             data.config.set(electionhour=hour)
-            tasks.publish_candidate.change_interval(time=time(hour=hour))
+            data.config.set(electionminute=minute)
+            tasks.publish_candidate.change_interval(time=[time(hour=hour, minute=minute, tzinfo=timezone.utc)])
         else:
             await interaction.response.send_message(
-                "Please input a valid hour.",
+                "Please input a valid time.",
                 ephemeral = True
             )
             return
 
         await interaction.response.send_message(
-            f"Daily election time set to {hour}:00 GMT.",
+            f"Daily election time set to {hour}:{minute} GMT.",
             ephemeral = True
         )
     
@@ -136,6 +138,7 @@ class Config(commands.GroupCog, group_name="config"):
         config_elections = data.config.get("elections")
         config_submissions = data.config.get("submissions")
         config_electionhour = data.config.get("electionhour")
+        config_electionminute = data.config.get("electionminute")
         config_role = data.config.get("role")
         config_monthlycleanse = data.config.get("monthlycleanse")
         config_cleanseremainders = data.config.get("cleanseremainders")
@@ -158,8 +161,8 @@ class Config(commands.GroupCog, group_name="config"):
             inline = False
         )
         embed.add_field(
-            name = "Daily election hour (`electionhour`)",
-            value = f"{config_electionhour} (<t:{config_electionhour * 3600}:t>)",
+            name = "Daily election time",
+            value = f"{config_electionhour}:{config_electionminute} GMT",
             inline = False
         )
         embed.add_field(

@@ -1,5 +1,5 @@
 from discord.ext import tasks
-from datetime import time
+from datetime import time, timezone
 import data
 import utils
 import elections
@@ -21,7 +21,9 @@ def check_for_cleanse():
         if remainders:
             cleanse_candidates(remainders)
 
-@tasks.loop(time=time(hour=data.config.get("electionhour", 17)))
+hour = data.config.get("electionhour", 17)
+minute = data.config.get("electionminute", 0)
+@tasks.loop(time=[time(hour=hour, minute=minute, tzinfo=timezone.utc)])
 async def publish_candidate(forced=False):
     if data.candidates:
         channel = bot.bot.get_channel(data.config.get("elections"))

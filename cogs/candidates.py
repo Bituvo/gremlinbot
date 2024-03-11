@@ -99,24 +99,17 @@ class Candidates(commands.GroupCog, group_name="candidates"):
         total = 0
 
         async for message in thread.history(limit=limit):
-            if not any(candidate["message-id"] == message.id for candidate in data.candidates):
-                if not message.id in data.elected_message_ids:
-                    for reaction in message.reactions:
-                        if reaction.emoji == "⭐":
-                            async for user in reaction.users():
-                                if user.id in [466987423046565908, 456226577798135808]:
-                                    data.add_candidate(message)
-                                    amount_added += 1
+            if data.is_eligible(message)[0]:
+                for reaction in message.reactions:
+                    if reaction.emoji == "⭐":
+                        async for user in reaction.users():
+                            if user.id in [466987423046565908, 456226577798135808]:
+                                data.add_candidate(message)
+                                amount_added += 1
 
             total += 1
         
-        message = f"{amount_added} / {total} gremlins"
-        if amount_added == 1:
-            message += " was added."
-        else:
-            message += " were added."
-
-        await interaction.followup.send(message)
+        await interaction.followup.send(f"{amount_added} / {total} messages {'was' if amount_added == 1 else 'were'} added.")
 
 async def setup(bot):
     await bot.add_cog(Candidates(bot))

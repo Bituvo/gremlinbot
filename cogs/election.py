@@ -24,7 +24,7 @@ class Election(commands.GroupCog, group_name="elections"):
     async def clear_elected(self, interaction):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
 
-        if not data.elected_message_ids:
+        if not data.elected_attachment_ids:
             await reply("The list of elected gremlins is already empty.")
             return
         

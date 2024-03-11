@@ -42,16 +42,37 @@ def save_data():
     with open("gremlins.dat", "wb") as file:
         file.write(compress(dumps({
             "day-count": day_count,
-            "elected-message-ids": elected_message_ids,
+            "elected-attachment-ids": elected_attachment_ids,
             "candidates": candidates
         }).encode()))
 
-day_count, elected_message_ids, candidates = load_data()
+day_count, elected_attachment_ids, candidates = load_data()
+
+def is_eligible(message):
+    if message.attachments:
+        if not all("image" in attachment.content_type or "video" in attachment.content_type for attachment in message.attachments):
+            return False, "An attached gremlin was not found in this post."
+    else:
+        return False, "An attached gremlin was not found in this post."
+
+    if any(candidate["message-id"] == message.id for candidate in candidates):
+        if len(message.attachments) > 1:
+            return False, "These gremlins are already in the list of candidates."
+        return False, "This gremlin is already in the list of candidates."
+
+    if any(attachment.id in elected_attachment_ids for attachment in message.attachments):
+        if len(message.attachments) > 1:
+            return False, "These gremlins have already been elected."
+        return False, "This gremlin has already been elected."
+    
+    return True, ""
 
 def add_candidate(message):
+    indexes = []
     for attachment in message.attachments:
         candidates.append({
-            "content-url": attachment.url,
+            "attachment-url": attachment.url,
+            "attachment-id": attachment.id,
             "filename": attachment.filename,
             "author-name": message.author.display_name,
             "author-mention": message.author.mention,
@@ -59,7 +80,7 @@ def add_candidate(message):
             "message-id": message.id,
             "description": message.content
         })
+        indexes.append(len(candidates) - 1)
 
     save_data()
-
-    return len(candidates) - 1
+    return indexes

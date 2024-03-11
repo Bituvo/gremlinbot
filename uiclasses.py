@@ -4,24 +4,25 @@ import discord
 import data
 import tasks
 
-class SetDescriptionModal(ui.Modal):
-    def __init__(self, index, title="Gremlin Description"):
-        super().__init__(title=title)
-        self.index = index
+class SetDescriptionModal(ui.Modal, title="Gremlin Description"):
+    def __init__(self, indexes):
+        super().__init__()
+        self.indexes = indexes
         self.add_item(ui.TextInput(label="New description"))
 
     async def on_submit(self, interaction):
-        data.candidates[self.index]["description"] = self.children[0].value
+        for i in self.indexes:
+            data.candidates[i]["description"] = self.children[0].value
         data.save_data()
 
         try:
             await interaction.response.edit_message(
-                content = f"Gremlin description set!",
+                content = f"Gremlin description{'s' if len(self.indexes) > 1 else ''} set!",
                 view = None
             )
         except discord.errors.NotFound:
             await interaction.response.send_message(
-                f"Gremlin description set!",
+                f"Gremlin description{'s' if len(self.indexes) > 1 else ''} set!",
                 ephemeral = True
             )
 
@@ -164,7 +165,7 @@ class ConfirmClearElectedView(ui.View):
     
     @ui.button(label="Clear elected list", style=discord.ButtonStyle.danger)
     async def clear_elected(self, interaction, button):
-        data.elected_message_ids = []
+        data.elected_attachment_ids = []
         data.day_count = 0
         data.save_data()
 

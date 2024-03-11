@@ -8,7 +8,7 @@ import aiohttp
 def elect_candidate():
     if len(data.candidates) == 1:
         elected_candidate = data.candidates.pop(0)
-        data.elected_message_ids.append(elected_candidate["message-id"])
+        data.elected_attachment_ids.append(elected_candidate["attachment-id"])
 
         return elected_candidate
 
@@ -22,7 +22,7 @@ def elect_candidate():
     )[0]
 
     elected_candidate = data.candidates.pop(elected_candidate_index)
-    data.elected_message_ids.append(elected_candidate["message-id"])
+    data.elected_attachment_ids.append(elected_candidate["attachment-id"])
 
     return elected_candidate
 
@@ -42,7 +42,7 @@ async def publish_election(channel, elected_candidate, forced):
                 f"||Submit your gremlins in {thread.jump_url}||")
     
     async with aiohttp.ClientSession() as session:
-        async with session.get(elected_candidate["content-url"]) as response:
+        async with session.get(elected_candidate["attachment-url"]) as response:
             buffer = BytesIO(await response.read())
 
     await channel.send(

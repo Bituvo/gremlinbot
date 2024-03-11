@@ -42,27 +42,24 @@ class ContextMenu(commands.Cog):
             await reply("You must be in the gremlin thread.")
             return
 
-        if not utils.is_eligible_candidate(message):
-            await reply("The message doesn't seem to contain any gremlins.")
+        success, why = data.is_eligible(message)
+        if not success:
+            await reply(why)
             return
         
-        if any(candidate["message-id"] == message.id for candidate in data.candidates):
-            await reply("This gremlin is already in the list of candidates.")
-            return
-        
-        if message.id in data.elected_message_ids:
-            await reply("This gremlin has already been elected!")
-            return
-        
-        index = data.add_candidate(message)
+        indexes = data.add_candidate(message)
+        plural = 's' if len(indexes) > 1 else ''
+        readable_indexes = f"ID{plural}: **`"
+        readable_indexes += f"#{indexes[0] + 1}" if len(indexes) == 1 else f"#{indexes[0] + 1} - #{indexes[-1] + 1}"
+        readable_indexes += "`**"
 
         if message.content:
-            await reply(f"Gremlin added! ID: **`#{index + 1}`**")
+            await reply(f"Gremlin{plural} added! {readable_indexes}")
         else:
             await reply((
-                f"Gremlin added! ID: **`#{index + 1}`**"
-                "\nIt has no description. Would you like to add one?"
-            ), view=uiclasses.AddDescriptionView(index))
+                f"Gremlin{plural} added! {readable_indexes}"
+                f"\n{'They have' if plural else 'It has'} no description. Would you like to add one?"
+            ), view=uiclasses.AddDescriptionView(indexes))
 
     async def remove_from_candidates(self, interaction, message: discord.Message):
         reply = lambda *args, **kwargs: interaction.response.send_message(*args, ephemeral=True, **kwargs)
@@ -100,16 +97,13 @@ class ContextMenu(commands.Cog):
             await reply("You must be in the gremlin thread.")
             return
         
-        candidate_index = next(
-            (i for i, candidate in enumerate(data.candidates) if candidate["message-id"] == message.id),
-            None
-        )
+        candidate_indexes = [i for i, candidate in enumerate(data.candidates) if candidate["message-id"] == message.id]
 
-        if candidate_index is None:
+        if not candidate_indexes:
             await reply("This message is not in the list of candidates.")
             return
         
-        await interaction.response.send_modal(uiclasses.SetDescriptionModal(candidate_index))
+        await interaction.response.send_modal(uiclasses.SetDescriptionModal(candidate_indexes))
 
 async def setup(bot):
     await bot.add_cog(ContextMenu(bot))

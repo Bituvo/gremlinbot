@@ -51,7 +51,7 @@ class Config(commands.GroupCog, group_name="config"):
         description = "Set the role required to manage gremlins"
     )
     @app_commands.describe(roleid="Role ID")
-    async def set_submissions_channel(self, interaction, roleid: str):
+    async def set_role_id(self, interaction, roleid: str):
         if roleid.isdigit():
             data.config.set(role=int(roleid))
         else:

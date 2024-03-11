@@ -23,7 +23,7 @@ def check_for_cleanse():
 
 hour = data.config.get("electionhour", 17)
 minute = data.config.get("electionminute", 0)
-@tasks.loop(time=[time(hour=hour, minute=minute, tzinfo=timezone.utc)])
+@tasks.loop(time=[time(hour=hour, minute=minute, tzinfo=timezone.utc)], reconnect=True)
 async def publish_candidate(forced=False):
     if data.candidates:
         channel = bot.bot.get_channel(data.config.get("elections"))
